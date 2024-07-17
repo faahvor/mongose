@@ -24,13 +24,13 @@ const userSchema = new Schema({
         required:true,
         trim:true
     },
-    Password:{
+    password:{
         type:String,
         required:true
     },
     createdAt:{
         type:Date,
-        required:Date.now
+        default:Date.now
     },
 })
 
