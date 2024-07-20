@@ -18,6 +18,7 @@ document.getElementById("form").addEventListener("submit",async(e)=>{
     .then((res)=>{
         console.log(res);
         alert("successfully logged in")
+        window.location.href="/views/welcome.html"
     })
     .catch((err)=>{
         console.log(err);
