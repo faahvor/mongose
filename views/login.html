@@ -8,17 +8,17 @@
 </head>
 <body class="bg-gradient-to-b from-[#FFA334] to-[#FF7213]">
     <h1 class="text-[3rem] font-bold text-center">Login Page</h1>
-    <form action="" class="bg-white md:p-[5rem] rounded-lg p-[2rem] md:mx-[30rem] mt-8 mx-2 mb-12">
+    <form id="form" action="" class="bg-white md:p-[5rem] rounded-lg p-[2rem] md:mx-[30rem] mt-8 mx-2 mb-12">
         <!-- Login page -->
        
         <div class="flex flex-col">
             <label class="mb-2 font-semibold text-2xl" for="">Username</label>
-            <input class="w-full rounded-xl mb-4 px-8 pb-2  border-4 border-[#FFA334] pt-2 outline-none" type="text">
+            <input id="username" class="w-full rounded-xl mb-4 px-8 pb-2  border-4 border-[#FFA334] pt-2 outline-none" type="text">
         </div>
       
         <div class="flex flex-col">
             <label class="mb-2 font-semibold text-2xl" for="">Password</label>
-            <input  class="w-full  rounded-xl mb-4 px-8 pb-2 border-4 border-[#FFA334] pt-4 outline-none" type="password">
+            <input id="password"  class="w-full  rounded-xl mb-4 px-8 pb-2 border-4 border-[#FFA334] pt-4 outline-none" type="password">
         </div>
         
         <div class="flex flex-col items-center">
@@ -32,6 +32,6 @@
 
     </form>
 
-    
+    <script src="login.js"></script>
 </body>
 </html>
