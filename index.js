@@ -13,6 +13,7 @@ app.use(express.json())
 app.use(cors())
 app.use("/api/v1/user", userRouter)
 
+    
 app.listen(port,()=>{
     console.log( `server is running on http://localhost:${port}`); 
 })

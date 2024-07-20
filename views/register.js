@@ -1,14 +1,13 @@
-const form = document.getElementById("registerForm");
+document.getElementById("registerForm").addEventListener('submit',async(event)=>{
+event.preventDefault()
 
-const formData = () => {
-  const { firstName, lastName, userName, email, password, confirmPassword } =
-    form;
+
   const data = {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    userName: userName.value,
-    email: email.value,
-    password: password.value,
+    firstName:document.getElementById("firstName").value,
+    lastName: document.getElementById("lastName").value,
+    userName: document.getElementById("userName").value,
+    email: document.getElementById("email").value,
+    password: document.getElementById("password").value,
   };
 
   console.log(data);
@@ -23,12 +22,10 @@ const formData = () => {
     .then((res) => res.json())
     .then((res) => {
       console.log(res);
+      alert("account successfully created")
     })
     .catch((err) => {
       console.log(err);
     });
-};
-form.addEventListener("submit", (e) => {
-  e.preventDefault();
-  formData();
 });
+
