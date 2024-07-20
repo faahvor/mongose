@@ -64,6 +64,9 @@ export const userLogin = async (req, res) => {
   }
 };
 
+//change password
+
+
 //all user access
 export const getAllUsers = async (req, res) => {
     try {
