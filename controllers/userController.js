@@ -1,6 +1,8 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
 
 //register
 export const createUser = async (req, res) => {
@@ -65,6 +67,13 @@ export const userLogin = async (req, res) => {
 };
 
 //change password
+export const changePassword = async(req,res)=>{
+  try{
+
+  }catch(err){
+
+  }
+}
 
 
 //all user access
