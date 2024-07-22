@@ -3,6 +3,8 @@ import dotenv from "dotenv"
 import dbConnection from "./db/conn.js"
 import cors from "cors"
 import userRouter from "./routes/userRoutes.js"
+import { OTPgenerator } from "./lib/OTPgenerator.js"
+
 
 dotenv.config()
 
@@ -13,7 +15,7 @@ app.use(express.json())
 app.use(cors())
 app.use("/api/v1/user", userRouter)
 
-    
+OTPgenerator()
 app.listen(port,()=>{
     console.log( `server is running on http://localhost:${port}`); 
 })

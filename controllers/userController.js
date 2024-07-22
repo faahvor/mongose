@@ -1,8 +1,11 @@
 import User from "../models/userModel.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import nodemailer from 'nodemailer';
-import crypto from 'crypto';
+import dotenv from "dotenv";
+import nodemailer from "nodemailer";
+import { OTPgenerator } from "../lib/OTPgenerator.js";
+
+dotenv.config()
 
 //register
 export const createUser = async (req, res) => {
@@ -46,12 +49,11 @@ export const userLogin = async (req, res) => {
     //compare passwords
     const isCorrectPassword = await bcrypt.compare(password, user.password);
     if (!isCorrectPassword) {
-      return res.status(401).json({ message: "invalid credentials" });
+      return res.status(401).json({ message: "invalid password" });
     }
-    const token = jwt.sign({userId: user._id},
-        process.env.JWT_SECRET_KEY,{
-            expiresIn:"1h",
-        })
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1h",
+    });
 
     res.status(200).json({
       status: "success",
@@ -65,25 +67,98 @@ export const userLogin = async (req, res) => {
     });
   }
 };
-
 //change password
-export const changePassword = async(req,res)=>{
-  try{
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+    const { userName } = req.params;
+    if (!userName) {
+      return res.status(400).json({ message: "please input username" });
+    } else if (newPassword === oldPassword) {
+      return res
+        .status(400)
+        .json({
+          message: "please old password can't be the same with new password ",
+        });
+    }
+    const user = await User.findOne({ userName });
+    if (!user) {
+      return res.status(400).json({ message: "user doesn't exist" });
+    }
+    const isCorrectPassword = await bcrypt.compare(oldPassword, user.password);
+    if (!isCorrectPassword) {
+      return res
+        .status(400)
+        .json({ message: "old password doesnt match database password" });
+    }
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-  }catch(err){
-
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({
+      status: "success",
+      message: "password successfully changed",
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "couldn't change password" });
   }
-}
+};
+
+//forget password
+export const forgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: "kindly input an email" });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "email doesn't exist" });
+    }
+    const otp = await OTPgenerator();
+    const transporter = nodemailer.createTransport({
+      service: "Gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true, // Use `true` for port 465, `false` for all other ports
+      auth: {
+        user: "tinachristian2022@gmail.com",
+        pass: process.env.GOOGLE_APP_PASSWORD, 
+      },
+    });
+
+    const mailOption = {
+      from: '"Avuwa Company" <tinachristian2022@gmail.com>', // sender address
+      to: "tinafvour2018@gmail.com", // list of receivers
+      subject: "Password Reset ", // Subject line
+      text: `Your OTP code is ${otp}. It is valid for the next 30 seconds.`, // Plain text body
+      html: `<p>Your OTP code is <b>${otp}</b>. It is valid for the next 30 seconds.</p>`, // HTML body
+    };
+    transporter.sendMail(mailOption, (error, info) => {
+      if (error) {
+        console.error("Error sending email: ", error);
+      } else {
+        console.log("Email sent: ", info.response);
+        return res.status(200).json({ message: "OTP sent successfully " });
+      }
+    });
+  } catch (err) {
+    return res.status(500).json({ 
+      message: "an error occurred while trying to change OTP" });
+  }
+};
 
 
 //all user access
 export const getAllUsers = async (req, res) => {
-    try {
-      // Retrieve all users from the database
-      const users = await User.find({}, { password: 0 }); // Exclude the password field from the response
-      return res.status(200).json({ users });
-    } catch (error) {
-      console.log(error.message);
-      return res.status(500).json({ message: "Error fetching users" });
-    }
-  };
+  try {
+    // Retrieve all users from the database
+    const users = await User.find({}, { password: 0 }); // Exclude the password field from the response
+    return res.status(200).json({ users });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: "Error fetching users" });
+  }
+};
