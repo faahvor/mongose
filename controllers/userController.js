@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 import nodemailer from "nodemailer";
 import { OTPgenerator } from "../lib/OTPgenerator.js";
 
-dotenv.config()
+dotenv.config();
 
 //register
 export const createUser = async (req, res) => {
@@ -75,11 +75,9 @@ export const changePassword = async (req, res) => {
     if (!userName) {
       return res.status(400).json({ message: "please input username" });
     } else if (newPassword === oldPassword) {
-      return res
-        .status(400)
-        .json({
-          message: "please old password can't be the same with new password ",
-        });
+      return res.status(400).json({
+        message: "please old password can't be the same with new password ",
+      });
     }
     const user = await User.findOne({ userName });
     if (!user) {
@@ -105,8 +103,34 @@ export const changePassword = async (req, res) => {
   }
 };
 
-//forget password
-export const forgetPassword = async (req, res) => {
+//change username
+export const changeUsername = async (req, res) => {
+  try {
+    const { newUserName } = req.body;
+    const { userName } = req.params;
+    if (newUserName === userName) {
+      return res.status(400).json({
+        message: "username cant be the same thing with the previous username",
+      });
+    }
+    const user = await User.findOne({ userName });
+    if (!user) {
+      return res.status(400).json({ message: "username doesn't exist" });
+    }
+
+    user.userName = newUserName;
+    await user.save();
+    res.status(200).json({
+      status: "success",
+      message: "username succefully changed",
+    });
+  } catch (err) {
+    return res.status(500).json({ message: "couldn't change username" });
+  }
+};
+
+//get otp
+export const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
@@ -125,7 +149,7 @@ export const forgetPassword = async (req, res) => {
       secure: true, // Use `true` for port 465, `false` for all other ports
       auth: {
         user: "tinachristian2022@gmail.com",
-        pass: process.env.GOOGLE_APP_PASSWORD, 
+        pass: process.env.GOOGLE_APP_PASSWORD,
       },
     });
 
@@ -145,10 +169,12 @@ export const forgetPassword = async (req, res) => {
       }
     });
   } catch (err) {
-    return res.status(500).json({ 
-      message: "an error occurred while trying to change OTP" });
+    return res.status(500).json({
+      message: "an error occurred while trying to change OTP",
+    });
   }
 };
+
 
 
 //all user access
