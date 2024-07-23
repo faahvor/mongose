@@ -174,9 +174,69 @@ export const sendOtp = async (req, res) => {
     });
   }
 };
+//login with otp 
 
+export const loginOtp = async(req,res)=>{
+  try{
+const {email,otp} = req.body
+if(!email || !otp){
+  return res
+  .status(400)
+  .json({message:"please provide an email and otp"})
+}
+const user = await User.findOne({email})
+  if(!user){
+    return res.status(400).json({message:"user not found"})
+  }
+  const token = jwt.sign({userId:user._id},process.env.JWT_SECRET_KEY,{
+    expiresIn:"1h",
+  })
+  res.status(200).json({
+    status:"success",
+    message:"user logged in successfully",
+    token
+  })
 
+  }catch(err){
+    res.status(500).json({
+      message:"an error occured when trying to login with OTP "
+    })
 
+  }
+}
+
+//update password
+
+export const updatePasswordOtp =async (req,res)=>{
+  try{
+    const {email} = req.params
+    const{newPassword}= req.body
+
+    if(!email || !newPassword){
+      return res
+      .status(400)
+      .json({
+        message:"please provide an email and a password"
+      })
+    }
+      const user = await User.findOne({email})
+      if(!user){
+        return res.status(400).json({message:"user not found"})
+      }
+      user.password = newPassword
+      user.save()
+
+      res
+      .status(200)
+      .json({
+        status:'success',
+        message:"password updated successfully"
+      })
+   
+  }catch(err){
+    res.status(500).json({message:"an error occured while trying to update password with otp"})
+  }
+}
 //all user access
 export const getAllUsers = async (req, res) => {
   try {
