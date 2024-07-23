@@ -141,7 +141,7 @@ export const sendOtp = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "email doesn't exist" });
     }
-    const otp = await OTPgenerator();
+    const otp = await OTPgenerator(user._id);
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       host: "smtp.gmail.com",
