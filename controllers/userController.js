@@ -155,7 +155,7 @@ export const sendOtp = async (req, res) => {
 
     const mailOption = {
       from: '"Avuwa Company" <tinachristian2022@gmail.com>', // sender address
-      to: "tinafvour2018@gmail.com", // list of receivers
+      to: "tinafavour2018@gmail.com", // list of receivers
       subject: "Password Reset ", // Subject line
       text: `Your OTP code is ${otp}. It is valid for the next 30 seconds.`, // Plain text body
       html: `<p>Your OTP code is <b>${otp}</b>. It is valid for the next 30 seconds.</p>`, // HTML body
@@ -223,7 +223,10 @@ export const updatePasswordOtp =async (req,res)=>{
       if(!user){
         return res.status(400).json({message:"user not found"})
       }
-      user.password = newPassword
+      const saltRounds = 10
+      const hashedPassword =   await bcrypt.hash(newPassword,saltRounds)
+
+      user.password = hashedPassword
       user.save()
 
       res
