@@ -21,7 +21,7 @@ router.patch("/changeUserName/:userName", verifyJWToken, changeUsername);
 router.patch("/send-otp", sendOtp);
 router.post("/login-otp", validateOtp, loginOtp);
 router.patch("/forget_password/:email", verifyJWToken, updatePasswordOtp);
-router.get("/all", verifyJWToken, getAllUsers);
+router.get("/all", getAllUsers);
 changeUsername;
 
 export default router;

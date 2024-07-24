@@ -2,7 +2,7 @@ document.getElementById("form").addEventListener("submit",async(e)=>{
     e.preventDefault()
 
     const data = {
-        username:document.getElementById("username").ariaValueMax,
+        username:document.getElementById("username").value,
         password:document.getElementById("password").value
     }
     console.log(data);
