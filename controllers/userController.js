@@ -11,26 +11,38 @@ dotenv.config();
 export const createUser = async (req, res) => {
   try {
     const { userName, password } = req.body;
+    const { role } = req.params;
     const user = new User(req.body);
 
+    // Check If User Exists In The Database
     const existingUser = await User.findOne({ userName });
     if (existingUser) {
-      return res.status(400).json({ message: "user already exists" });
+      return res.status(400).json({ message: "User Already Exists" });
     }
-    //amount of times salts are generated into the password ,makes it harder to crack
+
+    //amount of times salts are generated into the password, makes it harder to crack
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     user.password = hashedPassword;
-    await user.save();
-    res.status(200).send({
-      status: "success",
-      message: "user created successfully",
-    });
+    if (role === "admin" || role === "staff" || role === "user") {
+      user.role = role;
+      await user.save();
+      res.status(201).json({
+        status: "success",
+        message: `${user.role} created successfully`,
+      });
+    } else {
+      user.role = "user";
+      await user.save();
+      res.status(201).json({
+        status: "success",
+        message: `${user.role} created successfully`,
+      });
+    }
   } catch (error) {
-    res.status(400).send(error);
+    res.status(500).json({ error });
   }
 };
-
 //login page
 export const userLogin = async (req, res) => {
   try {
@@ -51,13 +63,17 @@ export const userLogin = async (req, res) => {
     if (!isCorrectPassword) {
       return res.status(401).json({ message: "invalid password" });
     }
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET_KEY,
+      {
+        expiresIn: "1h",
+      }
+    );
 
     res.status(200).json({
       status: "success",
-      message: "User logged in successfully",
+      message: `${user.role} logged in successfully`,
       token,
     });
   } catch (error) {
@@ -141,7 +157,7 @@ export const sendOtp = async (req, res) => {
     if (!user) {
       return res.status(400).json({ message: "email doesn't exist" });
     }
-    const otp = await OTPgenerator(user._id);
+    const otp = await OTPgenerator(user?.secretKey);
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       host: "smtp.gmail.com",
@@ -155,7 +171,7 @@ export const sendOtp = async (req, res) => {
 
     const mailOption = {
       from: '"Avuwa Company" <tinachristian2022@gmail.com>', // sender address
-      to: "tinafavour2018@gmail.com", // list of receivers
+      to: user.email, // list of receivers
       subject: "Password Reset ", // Subject line
       text: `Your OTP code is ${otp}. It is valid for the next 30 seconds.`, // Plain text body
       html: `<p>Your OTP code is <b>${otp}</b>. It is valid for the next 30 seconds.</p>`, // HTML body
@@ -174,72 +190,67 @@ export const sendOtp = async (req, res) => {
     });
   }
 };
-//login with otp 
+//login with otp
 
-export const loginOtp = async(req,res)=>{
-  try{
-const {email,otp} = req.body
-if(!email || !otp){
-  return res
-  .status(400)
-  .json({message:"please provide an email and otp"})
-}
-const user = await User.findOne({email})
-  if(!user){
-    return res.status(400).json({message:"user not found"})
-  }
-  const token = jwt.sign({userId:user._id},process.env.JWT_SECRET_KEY,{
-    expiresIn:"1h",
-  })
-  res.status(200).json({
-    status:"success",
-    message:"user logged in successfully",
-    token
-  })
-
-  }catch(err){
+export const loginOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res
+        .status(400)
+        .json({ message: "please provide an email and otp" });
+    }
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "user not found" });
+    }
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    res.status(200).json({
+      status: "success",
+      message: "user logged in successfully",
+      token,
+    });
+  } catch (err) {
     res.status(500).json({
-      message:"an error occured when trying to login with OTP "
-    })
-
+      message: "an error occured when trying to login with OTP ",
+    });
   }
-}
+};
 
 //update password
 
-export const updatePasswordOtp =async (req,res)=>{
-  try{
-    const {email} = req.params
-    const{newPassword}= req.body
+export const updatePasswordOtp = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const { newPassword } = req.body;
 
-    if(!email || !newPassword){
-      return res
-      .status(400)
-      .json({
-        message:"please provide an email and a password"
-      })
+    if (!email || !newPassword) {
+      return res.status(400).json({
+        message: "please provide an email and a password",
+      });
     }
-      const user = await User.findOne({email})
-      if(!user){
-        return res.status(400).json({message:"user not found"})
-      }
-      const saltRounds = 10
-      const hashedPassword =   await bcrypt.hash(newPassword,saltRounds)
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "user not found" });
+    }
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(newPassword, saltRounds);
 
-      user.password = hashedPassword
-      user.save()
+    user.password = hashedPassword;
+    user.save();
 
-      res
-      .status(200)
-      .json({
-        status:'success',
-        message:"password updated successfully"
-      })
-   
-  }catch(err){
-    res.status(500).json({message:"an error occured while trying to update password with otp"})
+    res.status(200).json({
+      status: "success",
+      message: "password updated successfully",
+    });
+  } catch (err) {
+    res.status(500).json({
+      message: "an error occured while trying to update password with otp",
+    });
   }
-}
+};
 //all user access
 export const getAllUsers = async (req, res) => {
   try {
