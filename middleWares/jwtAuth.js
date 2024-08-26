@@ -13,7 +13,7 @@ export const verifyJWToken = async (req, res, next) => {
     if (!decoded) {
       return res.status(401).json({
         status: "error",
-        message: "uUnauthorised :(",
+        message: "Unauthorised :(",
       });
     }
 

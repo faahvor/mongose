@@ -63,6 +63,7 @@ export const userLogin = async (req, res) => {
     if (!isCorrectPassword) {
       return res.status(401).json({ message: "invalid password" });
     }
+    console.log(process.env.JWT_SECRET_KEY)
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET_KEY,
@@ -81,6 +82,7 @@ export const userLogin = async (req, res) => {
       status: "error",
       message: "an error occurred when connecting",
     });
+    console.log(error)
   }
 };
 //change password
