@@ -6,7 +6,7 @@ document.getElementById("form").addEventListener("submit",async(e)=>{
         password:document.getElementById("password").value,
         newPassword:document.getElementById("newPassword").value
         }
-        console.log(data);
+        console.log(data); 
         fetch("http://localhost:3000/api/v1/change-password/:userName",{
             method:"PATCH",
             headers:{
