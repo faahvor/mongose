@@ -152,19 +152,20 @@ export const sendOtp = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email) {
-      return res.status(400).json({ message: "kindly input an email" });
+      return res.status(400).json({ message: "Kindly input an email." });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ message: "email doesn't exist" });
+      return res.status(400).json({ message: "Email doesn't exist." });
     }
+
     const otp = await OTPgenerator(user?.secretKey);
     const transporter = nodemailer.createTransport({
       service: "Gmail",
       host: "smtp.gmail.com",
       port: 465,
-      secure: true, // Use `true` for port 465, `false` for all other ports
+      secure: true,
       auth: {
         user: "tinachristian2022@gmail.com",
         pass: process.env.GOOGLE_APP_PASSWORD,
@@ -172,26 +173,24 @@ export const sendOtp = async (req, res) => {
     });
 
     const mailOption = {
-      from: '"Avuwa Company" <tinachristian2022@gmail.com>', // sender address
-      to: user.email, // list of receivers
-      subject: "Password Reset ", // Subject line
+      from: '"Avuwa Company" <tinachristian2022@gmail.com>', // Sender address
+      to: user.email, // List of receivers
+      subject: "Password Reset", // Subject line
       text: `Your OTP code is ${otp}. It is valid for the next 30 seconds.`, // Plain text body
-      html: `<p>Your OTP code is <b>${otp}</b>. It is valid for the next 30 seconds.</p>`, // HTML body
+      html: `<p>Your OTP code is <b>${otp}</b>. It is valid for the next 30 seconds.</p>`, // HTML body
     };
-    transporter.sendMail(mailOption, (error, info) => {
-      if (error) {
-        console.error("Error sending email: ", error);
-      } else {
-        console.log("Email sent: ", info.response);
-        return res.status(200).json({ message: "OTP sent successfully " });
-      }
-    });
-  } catch (err) {
+
+    await transporter.sendMail(mailOption);
+    return res.status(200).json({ message: "OTP sent successfully." });
+
+  } catch (error) {
+    console.error("Error occurred: ", error);
     return res.status(500).json({
-      message: "an error occurred while trying to change OTP",
+      message: "An error occurred while trying to send OTP.",
     });
   }
 };
+
 //login with otp
 
 export const loginOtp = async (req, res) => {
@@ -217,7 +216,7 @@ export const loginOtp = async (req, res) => {
   } catch (err) {
     res.status(500).json({
       message: "an error occured when trying to login with OTP ",
-    });
+    }); 
   }
 };
 
